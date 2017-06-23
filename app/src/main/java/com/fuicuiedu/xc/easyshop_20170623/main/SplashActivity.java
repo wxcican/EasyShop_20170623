@@ -1,9 +1,11 @@
-package com.fuicuiedu.xc.easyshop_20170623;
+package com.fuicuiedu.xc.easyshop_20170623.main;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 
+import com.fuicuiedu.xc.easyshop_20170623.R;
 import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
+import com.fuicuiedu.xc.easyshop_20170623.main.MainActivity;
 
 import java.util.Timer;
 import java.util.TimerTask;
