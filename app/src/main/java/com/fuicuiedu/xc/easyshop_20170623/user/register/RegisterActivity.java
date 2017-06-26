@@ -89,7 +89,7 @@ public class RegisterActivity extends AppCompatActivity {
         if (RegexUtils.verifyUsername(username) != RegexUtils.VERIFY_SUCCESS) {
             activityUtils.showToast(R.string.username_rules);
             return;
-        } else if (RegexUtils.verifyUsername(password) != RegexUtils.VERIFY_SUCCESS) {
+        } else if (RegexUtils.verifyPassword(password) != RegexUtils.VERIFY_SUCCESS) {
             activityUtils.showToast(R.string.password_rules);
             return;
             //判断两次密码相同
@@ -98,5 +98,6 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
         activityUtils.showToast("执行注册的网络请求");
+
     }
 }
