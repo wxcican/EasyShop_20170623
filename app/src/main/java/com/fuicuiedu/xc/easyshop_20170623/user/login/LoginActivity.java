@@ -1,4 +1,4 @@
-package com.fuicuiedu.xc.easyshop_20170623.user;
+package com.fuicuiedu.xc.easyshop_20170623.user.login;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,6 +13,7 @@ import android.widget.EditText;
 
 import com.fuicuiedu.xc.easyshop_20170623.R;
 import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
+import com.fuicuiedu.xc.easyshop_20170623.user.register.RegisterActivity;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
@@ -95,8 +96,7 @@ public class LoginActivity extends AppCompatActivity {
                 activityUtils.showToast("执行登录的网络请求");
                 break;
             case R.id.tv_register:
-                // TODO: 2017/6/23 0023 跳转注册页面
-                activityUtils.showToast("跳转注册页面");
+                activityUtils.startActivity(RegisterActivity.class);
                 break;
         }
     }
