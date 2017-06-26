@@ -6,6 +6,7 @@ import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
@@ -15,9 +16,18 @@ import com.fuicuiedu.xc.easyshop_20170623.R;
 import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
 import com.fuicuiedu.xc.easyshop_20170623.user.register.RegisterActivity;
 
+import java.io.IOException;
+
 import butterknife.BindView;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import okhttp3.Call;
+import okhttp3.Callback;
+import okhttp3.FormBody;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -92,8 +102,37 @@ public class LoginActivity extends AppCompatActivity {
     public void onClick(View v){
         switch (v.getId()){
             case R.id.btn_login:
-                // TODO: 2017/6/23 0023 执行登录的网络请求
-                activityUtils.showToast("执行登录的网络请求");
+
+                OkHttpClient okHttpClient = new OkHttpClient();
+
+                RequestBody requestBody = new FormBody.Builder()
+                        .add("username",username)
+                        .add("password",password)
+                        .build();
+
+                Request request = new Request.Builder()
+                        .url("http://wx.feicuiedu.com:9094/yitao/UserWeb?method=login")
+                        .post(requestBody)
+                        .build();
+
+                okHttpClient.newCall(request).enqueue(new Callback() {
+                    @Override
+                    public void onFailure(Call call, IOException e) {
+                        Log.e("aaa","网络连接失败");
+                    }
+
+                    @Override
+                    public void onResponse(Call call, Response response) throws IOException {
+                        Log.e("aaa","网络连接成功");
+                        if (response.isSuccessful()){
+                            Log.e("aaa","服务器响应成功");
+                        }else{
+                            Log.e("aaa","服务器响应失败");
+                        }
+                    }
+                });
+
+
                 break;
             case R.id.tv_register:
                 activityUtils.startActivity(RegisterActivity.class);

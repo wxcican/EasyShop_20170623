@@ -14,6 +14,7 @@ import android.widget.EditText;
 import com.fuicuiedu.xc.easyshop_20170623.R;
 import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
 import com.fuicuiedu.xc.easyshop_20170623.commons.RegexUtils;
+import com.fuicuiedu.xc.easyshop_20170623.network.EasyShopClient;
 
 import java.io.IOException;
 
@@ -108,47 +109,17 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-//        1.创建一个客户端
-//        2.构建请求
-//                2.1 添加url（服务器地址，接口）
-//                2.2 添加请求方式（get，post）
-//                2.3 添加请求头（根据服务器要求来添加，通常是不需要的）
-//                2.4 添加请求体（可以为空，根据服务器要求）
-//        3.客户端发送请求给服务器 ->  拿到响应
-//        4.解析响应
-//                4.1 判断响应码（是否请求成功，200-299）
-//                4.2 响应码 = 200-299   ->      取出响应体（解析，展示）
-
-
-        OkHttpClient okHttpClient = new OkHttpClient();
-
-        RequestBody requestBody = new FormBody.Builder()
-                .add("username", username)
-                .add("password", password)
-                .build();
-
-        Request request = new Request.Builder()
-                .url("http://wx.feicuiedu.com:9094/yitao/UserWeb?method=register")
-                .post(requestBody)
-                .build();
-
-        okHttpClient.newCall(request).enqueue(new Callback() {
+        Call call = EasyShopClient.getInstance().register(username,password);
+        call.enqueue(new Callback() {
             @Override
             public void onFailure(Call call, IOException e) {
-                Log.e("aaa", "网络连接失败");
+
             }
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
-                Log.e("aaa", "网络连接成功");
-                if (response.isSuccessful()) {
-                    Log.e("aaa", "服务器成功响应");
-                } else {
-                    Log.e("aaa", "请求失败");
-                }
+
             }
         });
-
-
     }
 }
