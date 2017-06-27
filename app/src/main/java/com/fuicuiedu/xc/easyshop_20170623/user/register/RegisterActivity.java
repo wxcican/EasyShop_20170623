@@ -16,6 +16,9 @@ import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
 import com.fuicuiedu.xc.easyshop_20170623.commons.RegexUtils;
 import com.fuicuiedu.xc.easyshop_20170623.network.EasyShopClient;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.IOException;
 
 import butterknife.BindView;
@@ -23,10 +26,6 @@ import butterknife.ButterKnife;
 import butterknife.OnClick;
 import okhttp3.Call;
 import okhttp3.Callback;
-import okhttp3.FormBody;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 public class RegisterActivity extends AppCompatActivity {
@@ -118,7 +117,39 @@ public class RegisterActivity extends AppCompatActivity {
 
             @Override
             public void onResponse(Call call, Response response) throws IOException {
+                //拿到响应体中的json字符串
+                String json = response.body().string();
+                //开始解析
+                try {
+                    JSONObject jsonObject = new JSONObject(json);
+                    int code = jsonObject.getInt("code");
+                    String messge = jsonObject.getString("msg");
 
+                    UserResult userResult = new UserResult();
+                    userResult.setCode(code);
+                    userResult.setMessage(messge);
+
+                    Log.e("okhttp",userResult.getCode() + "");
+                    Log.e("okhttp",userResult.getMessage());
+
+                    if (code == 1) {
+                        //取出data字段
+                        JSONObject jsonObject2 = jsonObject.getJSONObject("data");
+                        String username = jsonObject2.getString("username");
+
+                        User user = new User();
+                        user.setUsername(username);
+                        //将user对象放入userResult
+                        userResult.setUser(user);
+
+                        Log.e("okhttp", "用户名 = " + userResult.getUser().getUsername());
+                    }
+
+
+
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
             }
         });
     }
