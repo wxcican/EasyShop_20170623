@@ -1,4 +1,6 @@
-package com.fuicuiedu.xc.easyshop_20170623.user.register;
+package com.fuicuiedu.xc.easyshop_20170623.model;
+
+import com.google.gson.annotations.SerializedName;
 
 /**
  * 作者：王小超
@@ -8,17 +10,9 @@ package com.fuicuiedu.xc.easyshop_20170623.user.register;
 public class UserResult {
 
     private int code;
+    @SerializedName("msg")
     private String message;
     private User user;
-
-    public User getUser() {
-        return user;
-    }
-
-    public void setUser(User user) {
-        this.user = user;
-    }
-    //alt + insert
 
     public int getCode() {
         return code;
@@ -34,5 +28,13 @@ public class UserResult {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 }

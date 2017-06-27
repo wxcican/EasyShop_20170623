@@ -1,5 +1,7 @@
 package com.fuicuiedu.xc.easyshop_20170623.user.register;
 
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -10,11 +12,15 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
 
 import com.fuicuiedu.xc.easyshop_20170623.R;
 import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
 import com.fuicuiedu.xc.easyshop_20170623.commons.RegexUtils;
+import com.fuicuiedu.xc.easyshop_20170623.model.UserResult;
 import com.fuicuiedu.xc.easyshop_20170623.network.EasyShopClient;
+import com.fuicuiedu.xc.easyshop_20170623.network.UICallBack;
+import com.google.gson.Gson;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -109,47 +115,15 @@ public class RegisterActivity extends AppCompatActivity {
         }
 
         Call call = EasyShopClient.getInstance().register(username,password);
-        call.enqueue(new Callback() {
+        call.enqueue(new UICallBack() {
             @Override
-            public void onFailure(Call call, IOException e) {
+            public void onFailureUI(Call call, IOException e) {
 
             }
 
             @Override
-            public void onResponse(Call call, Response response) throws IOException {
-                //拿到响应体中的json字符串
-                String json = response.body().string();
-                //开始解析
-                try {
-                    JSONObject jsonObject = new JSONObject(json);
-                    int code = jsonObject.getInt("code");
-                    String messge = jsonObject.getString("msg");
+            public void onResponseUI(Call call, String json) {
 
-                    UserResult userResult = new UserResult();
-                    userResult.setCode(code);
-                    userResult.setMessage(messge);
-
-                    Log.e("okhttp",userResult.getCode() + "");
-                    Log.e("okhttp",userResult.getMessage());
-
-                    if (code == 1) {
-                        //取出data字段
-                        JSONObject jsonObject2 = jsonObject.getJSONObject("data");
-                        String username = jsonObject2.getString("username");
-
-                        User user = new User();
-                        user.setUsername(username);
-                        //将user对象放入userResult
-                        userResult.setUser(user);
-
-                        Log.e("okhttp", "用户名 = " + userResult.getUser().getUsername());
-                    }
-
-
-
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
             }
         });
     }
