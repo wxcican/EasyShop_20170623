@@ -2,6 +2,7 @@ package com.fuicuiedu.xc.easyshop_20170623.user.register;
 
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -17,10 +18,14 @@ import android.widget.Toast;
 import com.fuicuiedu.xc.easyshop_20170623.R;
 import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
 import com.fuicuiedu.xc.easyshop_20170623.commons.RegexUtils;
+import com.fuicuiedu.xc.easyshop_20170623.components.AlertDialogFragment;
+import com.fuicuiedu.xc.easyshop_20170623.components.ProgressDialogFragment;
+import com.fuicuiedu.xc.easyshop_20170623.main.MainActivity;
 import com.fuicuiedu.xc.easyshop_20170623.model.UserResult;
 import com.fuicuiedu.xc.easyshop_20170623.network.EasyShopClient;
 import com.fuicuiedu.xc.easyshop_20170623.network.UICallBack;
 import com.google.gson.Gson;
+import com.hannesdorfmann.mosby.mvp.MvpActivity;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -34,7 +39,8 @@ import okhttp3.Call;
 import okhttp3.Callback;
 import okhttp3.Response;
 
-public class RegisterActivity extends AppCompatActivity {
+public class RegisterActivity extends MvpActivity<RegisterView,RegisterPresenter>
+    implements RegisterView{
 
     @BindView(R.id.toolbar)
     Toolbar toolbar;
@@ -51,6 +57,7 @@ public class RegisterActivity extends AppCompatActivity {
     private String password;
     private String pwd_again;
     private ActivityUtils activityUtils;
+    private ProgressDialogFragment dialogFragment;//进度条
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,6 +68,13 @@ public class RegisterActivity extends AppCompatActivity {
         activityUtils = new ActivityUtils(this);
 
         init();
+    }
+
+    //创建业务类
+    @NonNull
+    @Override
+    public RegisterPresenter createPresenter() {
+        return new RegisterPresenter();
     }
 
     private void init() {
@@ -114,17 +128,51 @@ public class RegisterActivity extends AppCompatActivity {
             return;
         }
 
-        Call call = EasyShopClient.getInstance().register(username,password);
-        call.enqueue(new UICallBack() {
-            @Override
-            public void onFailureUI(Call call, IOException e) {
 
-            }
+        //业务：网络请求完成注册
+        presenter.register(username,password);
+    }
 
-            @Override
-            public void onResponseUI(Call call, String json) {
+    // #############################    视图接口中内容    #####################
+    @Override
+    public void showPrb() {
+        //关闭软键盘
+        activityUtils.hideSoftKeyboard();
+        //进度条
+        //初始化进度条
+        if (dialogFragment == null)dialogFragment = new ProgressDialogFragment();
+        //如果进度条已经显示，则跳出
+        if(dialogFragment.isVisible()) return;
+        //否则进度条显示
+        dialogFragment.show(getSupportFragmentManager(),"dialogFragment");
+    }
 
-            }
-        });
+    @Override
+    public void hidePrb() {
+        dialogFragment.dismiss();
+    }
+
+    @Override
+    public void registerSuccess() {
+        //成功跳转到主页
+        activityUtils.startActivity(MainActivity.class);
+        finish();
+    }
+
+    @Override
+    public void registerFailed() {
+        et_userName.setText("");
+    }
+
+    @Override
+    public void showMsg(String msg) {
+        activityUtils.showToast(msg);
+    }
+
+    @Override
+    public void showUserPasswordError(String msg) {
+        //展示弹窗，提示错误信息
+        AlertDialogFragment fragment = AlertDialogFragment.newInstance(msg);
+        fragment.show(getSupportFragmentManager(),getString(R.string.username_pwd_rule));
     }
 }
