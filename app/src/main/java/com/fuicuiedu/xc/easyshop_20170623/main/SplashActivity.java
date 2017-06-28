@@ -6,6 +6,7 @@ import android.os.Bundle;
 import com.fuicuiedu.xc.easyshop_20170623.R;
 import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
 import com.fuicuiedu.xc.easyshop_20170623.main.MainActivity;
+import com.fuicuiedu.xc.easyshop_20170623.model.CachePreferences;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -21,7 +22,14 @@ public class SplashActivity extends AppCompatActivity {
 
         activityUtils = new ActivityUtils(this);
 
-        // TODO: 2017/6/23 0023  判断用户是否登录，自动登录
+        //判断用户是否登录，自动登录
+        if (CachePreferences.getUser().getName() != null){
+            activityUtils.startActivity(MainActivity.class);
+            finish();
+            return;
+        }
+
+
         // TODO: 2017/6/23 0023  环信登录相关（账号冲突踢出）
 
         //1.5s跳转到主页

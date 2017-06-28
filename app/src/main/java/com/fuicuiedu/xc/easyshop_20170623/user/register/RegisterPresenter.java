@@ -1,5 +1,7 @@
 package com.fuicuiedu.xc.easyshop_20170623.user.register;
 
+import com.fuicuiedu.xc.easyshop_20170623.model.CachePreferences;
+import com.fuicuiedu.xc.easyshop_20170623.model.User;
 import com.fuicuiedu.xc.easyshop_20170623.model.UserResult;
 import com.fuicuiedu.xc.easyshop_20170623.network.EasyShopClient;
 import com.fuicuiedu.xc.easyshop_20170623.network.UICallBack;
@@ -55,7 +57,9 @@ public class RegisterPresenter extends MvpNullObjectBasePresenter<RegisterView>{
                 if (result.getCode() == 1){
                     //成功提示
                     getView().showMsg("注册成功");
-                    // TODO: 2017/6/28 0028 用户信息保存到本地配置当中，自动登录
+                    //用户信息保存到本地配置当中，自动登录
+                    User user = result.getUser();
+                    CachePreferences.setUser(user);
                     //执行注册成功的方法
                     getView().registerSuccess();
                 } else if (result.getCode() == 2) {

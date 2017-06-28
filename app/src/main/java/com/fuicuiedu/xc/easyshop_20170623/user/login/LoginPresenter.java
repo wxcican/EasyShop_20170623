@@ -1,5 +1,7 @@
 package com.fuicuiedu.xc.easyshop_20170623.user.login;
 
+import com.fuicuiedu.xc.easyshop_20170623.model.CachePreferences;
+import com.fuicuiedu.xc.easyshop_20170623.model.User;
 import com.fuicuiedu.xc.easyshop_20170623.model.UserResult;
 import com.fuicuiedu.xc.easyshop_20170623.network.EasyShopClient;
 import com.fuicuiedu.xc.easyshop_20170623.network.UICallBack;
@@ -42,7 +44,10 @@ public class LoginPresenter extends MvpNullObjectBasePresenter<LoginView>{
                 getView().hidePrb();
                 UserResult userResult = new Gson().fromJson(json,UserResult.class);
                 if (userResult.getCode() == 1){
-                    // TODO: 2017/6/28 0028 保存用户信息到本地配置
+                    //保存用户信息到本地配置
+                    User user =userResult.getUser();
+                    CachePreferences.setUser(user);
+
                     getView().showMsg("登录成功");
                     getView().loginSuccess();
                 }else if(userResult.getCode() ==2){
