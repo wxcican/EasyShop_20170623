@@ -20,7 +20,7 @@ public class RegisterPresenter extends MvpNullObjectBasePresenter<RegisterView>{
     //业务：执行网络请求，完成注册
     //在特定的地方，触发相应的UI操作
 
-    // TODO: 2017/6/28 0028 环信相关 
+    // TODO: 2017/6/28 0028 环信相关
 
     private Call call;
 

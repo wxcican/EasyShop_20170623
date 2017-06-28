@@ -1,5 +1,6 @@
 package com.fuicuiedu.xc.easyshop_20170623.user.login;
 
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -14,8 +15,11 @@ import android.widget.EditText;
 
 import com.fuicuiedu.xc.easyshop_20170623.R;
 import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
+import com.fuicuiedu.xc.easyshop_20170623.components.ProgressDialogFragment;
+import com.fuicuiedu.xc.easyshop_20170623.main.MainActivity;
 import com.fuicuiedu.xc.easyshop_20170623.network.EasyShopClient;
 import com.fuicuiedu.xc.easyshop_20170623.user.register.RegisterActivity;
+import com.hannesdorfmann.mosby.mvp.MvpActivity;
 
 import java.io.IOException;
 
@@ -30,7 +34,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class LoginActivity extends AppCompatActivity {
+public class LoginActivity extends MvpActivity<LoginView, LoginPresenter> implements LoginView {
 
     @BindView(R.id.et_username)
     EditText et_userName;
@@ -44,6 +48,7 @@ public class LoginActivity extends AppCompatActivity {
     private ActivityUtils activityUtils;
     private String username;
     private String password;
+    private ProgressDialogFragment dialogFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +58,12 @@ public class LoginActivity extends AppCompatActivity {
         activityUtils = new ActivityUtils(this);
 
         init();
+    }
+
+    @NonNull
+    @Override
+    public LoginPresenter createPresenter() {
+        return new LoginPresenter();
     }
 
     private void init() {
@@ -82,11 +93,13 @@ public class LoginActivity extends AppCompatActivity {
         @Override
         public void beforeTextChanged(CharSequence s, int start, int count, int after) {
         }
+
         //这里的s表示改变之后的内容，通常start和count组合，可以在s中读取本次改变字段中新的内容。
         //而before表示被改变的内容的数量。
         @Override
         public void onTextChanged(CharSequence s, int start, int before, int count) {
         }
+
         //表示最终内容
         @Override
         public void afterTextChanged(Editable s) {
@@ -99,30 +112,46 @@ public class LoginActivity extends AppCompatActivity {
     };
 
     //登录按钮点击事件
-    @OnClick({R.id.btn_login,R.id.tv_register})
-    public void onClick(View v){
-        switch (v.getId()){
+    @OnClick({R.id.btn_login, R.id.tv_register})
+    public void onClick(View v) {
+        switch (v.getId()) {
             case R.id.btn_login:
-
-
-                Call call = EasyShopClient.getInstance().login(username,password);
-                call.enqueue(new Callback() {
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-
-                    }
-
-                    @Override
-                    public void onResponse(Call call, Response response) throws IOException {
-
-                    }
-                });
-
-
+                //业务：登录操作
+                presenter.login(username, password);
                 break;
             case R.id.tv_register:
                 activityUtils.startActivity(RegisterActivity.class);
                 break;
         }
+    }
+
+    // #################################   视图接口相关   ########################
+    @Override
+    public void showPrb() {
+        activityUtils.hideSoftKeyboard();
+        if (dialogFragment == null) dialogFragment = new ProgressDialogFragment();
+        if (dialogFragment.isVisible()) return;
+        dialogFragment.show(getSupportFragmentManager(), "dialogFragment");
+    }
+
+    @Override
+    public void hidePrb() {
+        dialogFragment.dismiss();
+    }
+
+    @Override
+    public void loginFailed() {
+        et_userName.setText("");
+    }
+
+    @Override
+    public void loginSuccess() {
+        activityUtils.startActivity(MainActivity.class);
+        finish();
+    }
+
+    @Override
+    public void showMsg(String msg) {
+        activityUtils.showToast(msg);
     }
 }
