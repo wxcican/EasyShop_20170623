@@ -9,6 +9,7 @@ import android.view.ViewGroup;
 
 import com.fuicuiedu.xc.easyshop_20170623.R;
 import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
+import com.fuicuiedu.xc.easyshop_20170623.model.CachePreferences;
 import com.fuicuiedu.xc.easyshop_20170623.user.login.LoginActivity;
 
 import butterknife.ButterKnife;
@@ -37,8 +38,31 @@ public class MeFragment extends Fragment{
 
     @OnClick({R.id.tv_person_info, R.id.tv_login, R.id.tv_person_goods, R.id.tv_goods_upload})
     public void onClick(View v){
-        // TODO: 2017/6/23 0023 需要判断用户是否登录，从而觉得跳转的位置
-        activityUtils.startActivity(LoginActivity.class);
+        //需要判断用户是否登录，从而觉得跳转的位置
+        if(CachePreferences.getUser().getName() == null){
+            activityUtils.startActivity(LoginActivity.class);
+            return;
+        }
+
+        switch (v.getId()){
+            //个人信息
+            case R.id.tv_person_info:
+            //登录
+            case R.id.tv_login:
+                //跳转到个人信息页面
+//                activityUtils.startActivity(个人信息页面);
+                break;
+            //我的商品
+            case R.id.tv_person_goods:
+                //todo 跳转到我的商品页面
+                activityUtils.showToast("跳转到我的商品页面,待实现");
+                break;
+            //商品上传
+            case R.id.tv_goods_upload:
+                //todo 跳转到商品上传页面
+                activityUtils.showToast("跳转到商品上传页面,待实现");
+                break;
+        }
     }
 
 }

@@ -1,7 +1,14 @@
 package com.fuicuiedu.xc.easyshop_20170623.network;
 
+import com.fuicuiedu.xc.easyshop_20170623.model.CachePreferences;
+import com.google.gson.Gson;
+
+import java.io.File;
+
 import okhttp3.Call;
 import okhttp3.FormBody;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -17,6 +24,7 @@ public class EasyShopClient {
     private static EasyShopClient easyShopClient;
 
     private OkHttpClient okHttpClient;
+    private Gson gson;
 
     private EasyShopClient(){
         //初始化日志拦截器
@@ -28,6 +36,8 @@ public class EasyShopClient {
                 //添加日志拦截器
                 .addInterceptor(httpLoggingInterceptor)
                 .build();
+
+        gson = new Gson();
     }
 
     public static EasyShopClient getInstance(){
@@ -39,17 +49,17 @@ public class EasyShopClient {
 
     //登录
     public Call login(String username, String password){
-        RequestBody requestBody = new FormBody.Builder()
-                .add("username",username)
-                .add("password",password)
-                .build();
+            RequestBody requestBody = new FormBody.Builder()
+                    .add("username",username)
+                    .add("password",password)
+                    .build();
 
-        Request request = new Request.Builder()
-                .url(EasyShopApi.BASE_URL + EasyShopApi.LOGIN)
-                .post(requestBody)
-                .build();
+            Request request = new Request.Builder()
+                    .url(EasyShopApi.BASE_URL + EasyShopApi.LOGIN)
+                    .post(requestBody)
+                    .build();
 
-        return okHttpClient.newCall(request);
+            return okHttpClient.newCall(request);
     }
 
     //注册
@@ -61,6 +71,27 @@ public class EasyShopClient {
 
         Request request = new Request.Builder()
                 .url(EasyShopApi.BASE_URL + EasyShopApi.REGISTER)
+                .post(requestBody)
+                .build();
+
+        return okHttpClient.newCall(request);
+    }
+
+    //修改头像
+    public Call uploadAvatar(File file){
+//        需要传一个用户类JSON字符串格式，并且上传头像文件
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                //传一个用户类JSON字符串格式
+                .addFormDataPart("user",gson.toJson(CachePreferences.getUser()))
+                //上传头像文件
+                .addFormDataPart("image",file.getName(),
+                        RequestBody.create(MediaType.parse("image/png"),file))
+                .build();
+
+
+        Request request = new Request.Builder()
+                .url(EasyShopApi.BASE_URL + EasyShopApi.UPDATA)
                 .post(requestBody)
                 .build();
 
