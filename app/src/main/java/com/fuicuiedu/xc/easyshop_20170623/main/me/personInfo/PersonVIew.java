@@ -7,7 +7,7 @@ import com.hannesdorfmann.mosby.mvp.MvpView;
  * 邮箱：wxcican@qq.com
  */
 
-public interface PersonVIew extends MvpView{
+public interface PersonView extends MvpView{
 
     void showPrb();
 

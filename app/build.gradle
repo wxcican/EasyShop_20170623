@@ -38,5 +38,7 @@ dependencies {
     compile 'com.google.code.gson:gson:2.8.0'
     //mosby。MVP
     compile 'com.hannesdorfmann.mosby:mvp:2.0.1'
+    //圆形头像控件
+    compile 'com.pkmmte.view:circularimageview:1.1'
 
 }

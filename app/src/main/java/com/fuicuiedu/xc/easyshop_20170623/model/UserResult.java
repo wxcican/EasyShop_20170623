@@ -12,6 +12,7 @@ public class UserResult {
     private int code;
     @SerializedName("msg")
     private String message;
+    @SerializedName("data")
     private User user;
 
     public int getCode() {

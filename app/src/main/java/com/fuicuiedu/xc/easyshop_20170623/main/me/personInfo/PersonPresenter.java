@@ -18,7 +18,7 @@ import okhttp3.Call;
  * 邮箱：wxcican@qq.com
  */
 
-public class PersonPresenter extends MvpNullObjectBasePresenter<PersonVIew>{
+public class PersonPresenter extends MvpNullObjectBasePresenter<PersonView>{
 
 
     private Call call;
@@ -59,7 +59,7 @@ public class PersonPresenter extends MvpNullObjectBasePresenter<PersonVIew>{
                 //上传成功，触发UI操作（更新头像）
                 getView().updataAvatar(result.getUser().getHead_Image());
 
-                // TODO: 2017/6/29 0029 环信更新头像 
+                // TODO: 2017/6/29 0029 环信更新头像
 
             }
         });
