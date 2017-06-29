@@ -40,5 +40,7 @@ dependencies {
     compile 'com.hannesdorfmann.mosby:mvp:2.0.1'
     //圆形头像控件
     compile 'com.pkmmte.view:circularimageview:1.1'
+    //图片裁剪的库
+    compile 'org.hybridsquad.android.photocropper:library:2.1.0'
 
 }

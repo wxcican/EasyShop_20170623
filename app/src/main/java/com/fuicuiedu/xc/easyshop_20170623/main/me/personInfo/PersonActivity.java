@@ -1,6 +1,8 @@
 package com.fuicuiedu.xc.easyshop_20170623.main.me.personInfo;
 
+import android.app.Activity;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.Toolbar;
@@ -12,6 +14,7 @@ import android.widget.ListView;
 
 import com.fuicuiedu.xc.easyshop_20170623.R;
 import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
+import com.fuicuiedu.xc.easyshop_20170623.components.PicWindow;
 import com.fuicuiedu.xc.easyshop_20170623.components.ProgressDialogFragment;
 import com.fuicuiedu.xc.easyshop_20170623.main.MainActivity;
 import com.fuicuiedu.xc.easyshop_20170623.model.CachePreferences;
@@ -19,6 +22,11 @@ import com.fuicuiedu.xc.easyshop_20170623.model.ItemShow;
 import com.fuicuiedu.xc.easyshop_20170623.model.User;
 import com.hannesdorfmann.mosby.mvp.MvpActivity;
 
+import org.hybridsquad.android.library.CropHandler;
+import org.hybridsquad.android.library.CropHelper;
+import org.hybridsquad.android.library.CropParams;
+
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -40,6 +48,7 @@ public class PersonActivity extends MvpActivity<PersonView, PersonPresenter> imp
     private List<ItemShow> list = new ArrayList<>();
     //适配器
     private PersonAdapter adapter;
+    private PicWindow picWindow;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,8 +122,15 @@ public class PersonActivity extends MvpActivity<PersonView, PersonPresenter> imp
         switch (view.getId()){
             //点击头像
             case R.id.iv_user_head:
-                // TODO: 2017/6/29 0029  更新头像，待实现
-                activityUtils.showToast("更新头像，待实现");
+                //头像来源选择（相册，相机）
+                if (picWindow == null){
+                    picWindow = new PicWindow(this,listener);
+                }
+                if (picWindow.isShowing()){
+                    picWindow.dismiss();
+                    return;
+                }
+                picWindow.show();
                 break;
             //点击退出登录
             case R.id.btn_login_out:
@@ -128,6 +144,70 @@ public class PersonActivity extends MvpActivity<PersonView, PersonPresenter> imp
                 // TODO: 2017/6/29 0029 退出环信相关
                 break;
         }
+    }
+
+    //图片来源选择弹窗的监听
+    private PicWindow.Listener listener = new PicWindow.Listener() {
+        @Override
+        public void toGallery() {
+            //从相册中选择
+            //清空裁剪的缓存
+            CropHelper.clearCachedCropFile(handler.getCropParams().uri);
+            Intent intent = CropHelper.buildCropFromGalleryIntent(handler.getCropParams());
+            startActivityForResult(intent,CropHelper.REQUEST_CROP);
+        }
+
+        @Override
+        public void toCamera() {
+            //从相机中选择
+            activityUtils.showToast("从相机中选择");
+            CropHelper.clearCachedCropFile(handler.getCropParams().uri);
+            Intent intent = CropHelper.buildCaptureIntent(handler.getCropParams().uri);
+            startActivityForResult(intent,CropHelper.REQUEST_CAMERA);
+        }
+    };
+
+    //图片裁剪的handler
+    private CropHandler handler = new CropHandler() {
+        @Override
+        public void onPhotoCropped(Uri uri) {
+            //图片裁剪结束后
+            //通过uri拿到图片文件
+            File file = new File(uri.getPath());
+            //业务：上传头像
+            presenter.updataAvatar(file);
+        }
+
+        @Override
+        public void onCropCancel() {
+            //停止裁剪触发
+        }
+
+        @Override
+        public void onCropFailed(String message) {
+            //裁剪失败
+        }
+
+        @Override
+        public CropParams getCropParams() {
+            //设置裁剪参数
+            CropParams cropParams = new CropParams();
+            cropParams.aspectX = 400;
+            cropParams.aspectY = 400;
+            return cropParams;
+        }
+
+        @Override
+        public Activity getContext() {
+            return PersonActivity.this;
+        }
+    };
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        //CropHelper帮助我们去处理结果（裁剪完成的图像）
+        CropHelper.handleResult(handler,requestCode, resultCode, data);
     }
 
     //  #######################   视图接口相关  #####################
