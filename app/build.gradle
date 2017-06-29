@@ -42,5 +42,7 @@ dependencies {
     compile 'com.pkmmte.view:circularimageview:1.1'
     //图片裁剪的库
     compile 'org.hybridsquad.android.photocropper:library:2.1.0'
+    //ImageLoader（用于图片加载）
+    compile 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
 
 }

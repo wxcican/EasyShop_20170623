@@ -14,13 +14,17 @@ import android.widget.ListView;
 
 import com.fuicuiedu.xc.easyshop_20170623.R;
 import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
+import com.fuicuiedu.xc.easyshop_20170623.components.AvatarLoadOptions;
 import com.fuicuiedu.xc.easyshop_20170623.components.PicWindow;
 import com.fuicuiedu.xc.easyshop_20170623.components.ProgressDialogFragment;
 import com.fuicuiedu.xc.easyshop_20170623.main.MainActivity;
 import com.fuicuiedu.xc.easyshop_20170623.model.CachePreferences;
 import com.fuicuiedu.xc.easyshop_20170623.model.ItemShow;
 import com.fuicuiedu.xc.easyshop_20170623.model.User;
+import com.fuicuiedu.xc.easyshop_20170623.network.EasyShopApi;
 import com.hannesdorfmann.mosby.mvp.MvpActivity;
+import com.nostra13.universalimageloader.core.DisplayImageOptions;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import org.hybridsquad.android.library.CropHandler;
 import org.hybridsquad.android.library.CropHelper;
@@ -65,7 +69,8 @@ public class PersonActivity extends MvpActivity<PersonView, PersonPresenter> imp
         listView.setAdapter(adapter);
         listView.setOnItemClickListener(onItemClickListener);
 
-        // TODO: 2017/6/29 0029 获取用户头像
+        //获取用户头像
+        updataAvatar(CachePreferences.getUser().getHead_Image());
     }
 
     @NonNull
@@ -230,6 +235,10 @@ public class PersonActivity extends MvpActivity<PersonView, PersonPresenter> imp
 
     @Override
     public void updataAvatar(String url) {
-        // TODO: 2017/6/29 0029 头像加载操作 
+        //头像加载操作
+        ImageLoader.getInstance()
+                //头像路径（服务器）,头像显示控件,加载选项
+                .displayImage(EasyShopApi.IMAGE_URL + url,ivUserHead,
+                        AvatarLoadOptions.build());
     }
 }
