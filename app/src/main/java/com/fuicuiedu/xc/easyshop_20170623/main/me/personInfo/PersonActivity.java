@@ -111,8 +111,8 @@ public class PersonActivity extends MvpActivity<PersonView, PersonPresenter> imp
                     break;
                 //昵称
                 case 1:
-                    // TODO: 2017/6/29 0029 昵称页面
-                    activityUtils.showToast("跳转到昵称修改页面，待实现");
+                    //昵称页面
+                    activityUtils.startActivity(NickNameActivity.class);
                     break;
                 //环信ID
                 case 2:

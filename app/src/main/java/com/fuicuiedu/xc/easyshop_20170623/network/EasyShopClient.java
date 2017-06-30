@@ -1,6 +1,7 @@
 package com.fuicuiedu.xc.easyshop_20170623.network;
 
 import com.fuicuiedu.xc.easyshop_20170623.model.CachePreferences;
+import com.fuicuiedu.xc.easyshop_20170623.model.User;
 import com.google.gson.Gson;
 
 import java.io.File;
@@ -89,6 +90,21 @@ public class EasyShopClient {
                         RequestBody.create(MediaType.parse("image/png"),file))
                 .build();
 
+
+        Request request = new Request.Builder()
+                .url(EasyShopApi.BASE_URL + EasyShopApi.UPDATA)
+                .post(requestBody)
+                .build();
+
+        return okHttpClient.newCall(request);
+    }
+
+    //修改昵称
+    public Call uploadUser(User user){
+        RequestBody requestBody = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("user",gson.toJson(user))
+                .build();
 
         Request request = new Request.Builder()
                 .url(EasyShopApi.BASE_URL + EasyShopApi.UPDATA)
