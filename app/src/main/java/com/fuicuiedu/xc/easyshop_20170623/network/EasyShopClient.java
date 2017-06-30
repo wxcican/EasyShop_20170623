@@ -122,6 +122,7 @@ public class EasyShopClient {
                 .build();
 
         Request request = new Request.Builder()
+                .url(EasyShopApi.BASE_URL + EasyShopApi.GETGOODS)
                 .post(requestBody)
                 .build();
 
