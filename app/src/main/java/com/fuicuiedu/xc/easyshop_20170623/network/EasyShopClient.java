@@ -113,4 +113,18 @@ public class EasyShopClient {
 
         return okHttpClient.newCall(request);
     }
+
+    //获取所有商品
+    public Call getGoods(int pageNo,String type){
+        RequestBody requestBody = new FormBody.Builder()
+                .add("pageNo",String.valueOf(pageNo))
+                .add("type",type)
+                .build();
+
+        Request request = new Request.Builder()
+                .post(requestBody)
+                .build();
+
+        return okHttpClient.newCall(request);
+    }
 }
