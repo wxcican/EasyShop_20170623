@@ -143,4 +143,20 @@ public class EasyShopClient {
 
         return okHttpClient.newCall(request);
     }
+
+    //获取个人商品
+    public Call getPersonData(int pageNo,String type,String master){
+        RequestBody requestBody = new FormBody.Builder()
+                .add("pageNo",String.valueOf(pageNo))
+                .add("master",master)
+                .add("type",type)
+                .build();
+
+        Request request = new Request.Builder()
+                .url(EasyShopApi.BASE_URL + EasyShopApi.GETGOODS)
+                .post(requestBody)
+                .build();
+
+        return okHttpClient.newCall(request);
+    }
 }
