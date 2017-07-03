@@ -8,21 +8,28 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.fuicuiedu.xc.easyshop_20170623.R;
 import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
+import com.fuicuiedu.xc.easyshop_20170623.components.AvatarLoadOptions;
 import com.fuicuiedu.xc.easyshop_20170623.components.ProgressDialogFragment;
+import com.fuicuiedu.xc.easyshop_20170623.model.CachePreferences;
 import com.fuicuiedu.xc.easyshop_20170623.model.GoodsDetail;
 import com.fuicuiedu.xc.easyshop_20170623.model.User;
+import com.fuicuiedu.xc.easyshop_20170623.network.EasyShopApi;
+import com.fuicuiedu.xc.easyshop_20170623.user.login.LoginActivity;
 import com.hannesdorfmann.mosby.mvp.MvpActivity;
+import com.nostra13.universalimageloader.core.ImageLoader;
 
 import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 import me.relex.circleindicator.CircleIndicator;
 
 public class GoodsDetailActivity extends MvpActivity<GoodsDetailView,GoodsDetailPresenter> implements GoodsDetailView{
@@ -102,7 +109,18 @@ public class GoodsDetailActivity extends MvpActivity<GoodsDetailView,GoodsDetail
     }
 
     private void initView() {
-        // TODO: 2017/7/3 0003  完成数据的初始化相关代码，逻辑
+        //拿到uuid
+        str_uuid = getIntent().getStringExtra(UUID);
+        //来自哪个页面
+        int btn_show = getIntent().getIntExtra(STATE,0);
+        //如果=1，来自我的页面
+        if (btn_show == 1){
+            tv_goods_delete.setVisibility(View.VISIBLE);//显示“删除”
+            btn_detail_message.setVisibility(View.GONE);//隐藏“发消息”
+        }
+        //获取商品详情，业务
+        presenter.getData(str_uuid);
+
     }
 
     @NonNull
@@ -118,40 +136,81 @@ public class GoodsDetailActivity extends MvpActivity<GoodsDetailView,GoodsDetail
         return super.onOptionsItemSelected(item);
     }
 
+    //点击，发消息，删除
+    @OnClick({R.id.btn_detail_message,R.id.tv_goods_delete})
+    public void onClick(View v){
+        //判断登录状态
+        if (CachePreferences.getUser().getName() == null){
+            activityUtils.startActivity(LoginActivity.class);
+            return;
+        }
+        switch (v.getId()){
+            //发消息
+            case R.id.btn_detail_message:
+                // TODO: 2017/7/3 0003 跳转到环信发消息的页面
+                activityUtils.showToast("跳转到环信发消息的页面,待实现");
+                break;
+            //删除
+            case R.id.tv_goods_delete:
+                // TODO: 2017/7/3 0003 执行删除操作
+                activityUtils.showToast("执行删除操作,待实现");
+                break;
+        }
+    }
 
     // ###################################   视图接口相关    ################################
     @Override
     public void showProgress() {
-
+        if (progressDialogFragment == null)progressDialogFragment = new ProgressDialogFragment();
+        if (progressDialogFragment.isVisible()) return;
+        progressDialogFragment.show(getSupportFragmentManager(),"progress");
     }
 
     @Override
     public void hideProgress() {
-
+        progressDialogFragment.dismiss();
     }
 
     @Override
     public void setImageData(ArrayList<String> arrayList) {
-
+        list_uri = arrayList;
+        //加载图片
+        for (int i = 0; i < list_uri.size(); i++) {
+            ImageView view = new ImageView(this);
+            ImageLoader.getInstance().displayImage(
+                    EasyShopApi.IMAGE_URL + list_uri.get(i),
+                    view, AvatarLoadOptions.build_item());
+            //添加到图片控件集合当中
+            list.add(view);
+        }
+        adapter.notifyDataSetChanged();
+        //确认Viewpager显示页面数量之后，创建圆点指示器
+        indicator.setViewPager(viewPager);
     }
 
     @Override
     public void setData(GoodsDetail data, User goods_user) {
-
+        //数据绑定
+        this.goods_user = goods_user;
+        tv_detail_name.setText(data.getName());
+        tv_detail_price.setText(getString(R.string.goods_money, data.getPrice()));
+        tv_detail_master.setText(getString(R.string.goods_detail_master, goods_user.getNick_name()));
+        tv_detail_describe.setText(data.getDescription());
     }
 
     @Override
     public void showError() {
-
+        tv_goods_error.setVisibility(View.VISIBLE);
+        toolbar.setTitle("商品过期不存在");
     }
 
     @Override
     public void showMessage(String msg) {
-
+        activityUtils.showToast(msg);
     }
 
     @Override
     public void deleteEnd() {
-
+        finish();
     }
 }
