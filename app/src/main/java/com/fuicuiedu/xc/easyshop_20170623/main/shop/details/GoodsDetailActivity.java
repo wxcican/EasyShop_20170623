@@ -99,7 +99,9 @@ public class GoodsDetailActivity extends MvpActivity<GoodsDetailView,GoodsDetail
         adapter.setListener(new GoodsDetailAdapter.OnItemClickListener() {
             @Override
             public void onItemClick() {
-                // TODO: 2017/7/3 0003 点击图片，跳转到图片详情页
+                //点击图片，跳转到图片详情页
+                Intent intent = GoodsDetailInfoActivity.getStartIntent(getApplicationContext(),list_uri);
+                startActivity(intent);
             }
         });
         viewPager.setAdapter(adapter);
