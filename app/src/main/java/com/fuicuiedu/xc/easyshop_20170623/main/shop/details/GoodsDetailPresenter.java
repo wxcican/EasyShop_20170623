@@ -20,11 +20,13 @@ import okhttp3.Call;
 public class GoodsDetailPresenter extends MvpNullObjectBasePresenter<GoodsDetailView>{
 
     private Call getDetailCall;
+    private Call deleteCall;
 
     @Override
     public void detachView(boolean retainInstance) {
         super.detachView(retainInstance);
         if (getDetailCall != null) getDetailCall.cancel();
+        if (deleteCall != null) deleteCall.cancel();
     }
 
     //获取商品详细数据
@@ -62,5 +64,52 @@ public class GoodsDetailPresenter extends MvpNullObjectBasePresenter<GoodsDetail
         });
     }
 
-    // TODO: 2017/7/3 0003 删除商品业务 
+    //删除商品业务
+    public void delete(String uuid){
+        getView().showProgress();
+        deleteCall = EasyShopClient.getInstance().deleteGoods(uuid);
+        deleteCall.enqueue(new UICallBack() {
+            @Override
+            public void onFailureUI(Call call, IOException e) {
+                getView().hideProgress();
+                getView().showMessage(e.getMessage());
+            }
+
+            @Override
+            public void onResponseUI(Call call, String json) {
+                getView().hideProgress();
+                GoodsDetailResult result = new Gson().fromJson(json,GoodsDetailResult.class);
+                if (result.getCode() == 1){
+                    //执行删除商品的方法
+                    getView().deleteEnd();
+                    getView().showMessage("删除成功");
+                }else{
+                    getView().showMessage("删除失败");
+                }
+            }
+        });
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

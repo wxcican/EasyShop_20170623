@@ -1,9 +1,11 @@
 package com.fuicuiedu.xc.easyshop_20170623.main.shop.details;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v4.view.ViewPager;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -154,8 +156,22 @@ public class GoodsDetailActivity extends MvpActivity<GoodsDetailView,GoodsDetail
                 break;
             //删除
             case R.id.tv_goods_delete:
-                // TODO: 2017/7/3 0003 执行删除操作
-                activityUtils.showToast("执行删除操作,待实现");
+                //执行删除操作
+                //弹出警告，询问用户是否要删除
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("商品删除");
+                builder.setMessage("是否删除该商品？");
+                //设置确认按钮，点击删除
+                builder.setPositiveButton(R.string.goods_delete, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //执行删除方法
+                        presenter.delete(str_uuid);
+                    }
+                });
+                //设置取消按钮
+                builder.setNegativeButton("取消",null);
+                builder.create().show();
                 break;
         }
     }

@@ -1,5 +1,6 @@
 package com.fuicuiedu.xc.easyshop_20170623.main.me.persongoods;
 
+import android.content.Intent;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,6 +16,7 @@ import com.fuicuiedu.xc.easyshop_20170623.R;
 import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
 import com.fuicuiedu.xc.easyshop_20170623.main.shop.ShopAdapter;
 import com.fuicuiedu.xc.easyshop_20170623.main.shop.ShopView;
+import com.fuicuiedu.xc.easyshop_20170623.main.shop.details.GoodsDetailActivity;
 import com.fuicuiedu.xc.easyshop_20170623.model.GoodsInfo;
 import com.hannesdorfmann.mosby.mvp.MvpActivity;
 
@@ -72,7 +74,10 @@ public class PersonGoodsActivity extends MvpActivity<ShopView,PersonGoodsPresent
         shopAdapter.setListener(new ShopAdapter.onItemClickListener() {
             @Override
             public void onItemClicked(GoodsInfo goodsInfo) {
-                // TODO: 2017/7/4 0004 跳转到商品详情页
+                //跳转到商品详情页
+                Intent intent = GoodsDetailActivity.getStateIntent(
+                        PersonGoodsActivity.this,goodsInfo.getUuid(),1);
+                startActivity(intent);
             }
         });
         recyclerView.setAdapter(shopAdapter);
