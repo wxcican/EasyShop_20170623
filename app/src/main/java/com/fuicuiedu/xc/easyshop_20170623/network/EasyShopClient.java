@@ -1,10 +1,12 @@
 package com.fuicuiedu.xc.easyshop_20170623.network;
 
 import com.fuicuiedu.xc.easyshop_20170623.model.CachePreferences;
+import com.fuicuiedu.xc.easyshop_20170623.model.GoodsUpLoad;
 import com.fuicuiedu.xc.easyshop_20170623.model.User;
 import com.google.gson.Gson;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import okhttp3.Call;
 import okhttp3.FormBody;
@@ -168,6 +170,27 @@ public class EasyShopClient {
 
         Request request = new Request.Builder()
                 .url(EasyShopApi.BASE_URL + EasyShopApi.DELETE)
+                .post(requestBody)
+                .build();
+
+        return okHttpClient.newCall(request);
+    }
+
+    //商品上传
+    public Call upLoad(GoodsUpLoad goodsUpLoad, ArrayList<File> files){
+        MultipartBody.Builder builder = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("good",gson.toJson(goodsUpLoad));
+        //将所有的图片文件添加进来
+        for (File file : files){
+            builder.addFormDataPart("image",file.getName(),
+                    RequestBody.create(MediaType.parse("iamge/png"),file));
+        }
+
+        RequestBody requestBody = builder.build();
+
+        Request request = new Request.Builder()
+                .url(EasyShopApi.BASE_URL + EasyShopApi.UPLOADGOODS)
                 .post(requestBody)
                 .build();
 
