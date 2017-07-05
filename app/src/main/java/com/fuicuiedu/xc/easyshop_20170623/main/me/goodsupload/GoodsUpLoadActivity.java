@@ -111,7 +111,7 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
 
         //获取缓存文件夹中的图片文件
         list = getFilePhoto();
-        adapter = new GoodsUpLoadAdapter(this,list);
+        adapter = new GoodsUpLoadAdapter(this, list);
         adapter.setListener(itemClickListener);
         recyclerView.setAdapter(adapter);
 
@@ -141,7 +141,7 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
             //相册
             CropHelper.clearCachedCropFile(cropHandler.getCropParams().uri);
             Intent intent = CropHelper.buildCropFromGalleryIntent(cropHandler.getCropParams());
-            startActivityForResult(intent,CropHelper.REQUEST_CROP);
+            startActivityForResult(intent, CropHelper.REQUEST_CROP);
         }
 
         @Override
@@ -149,7 +149,7 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
             //相机
             CropHelper.clearCachedCropFile(cropHandler.getCropParams().uri);
             Intent intent = CropHelper.buildCaptureIntent(cropHandler.getCropParams().uri);
-            startActivityForResult(intent,CropHelper.REQUEST_CAMERA);
+            startActivityForResult(intent, CropHelper.REQUEST_CAMERA);
         }
     };
 
@@ -161,9 +161,9 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
             //文件名：就是用系统当前时间，不重复
             String fileName = String.valueOf(System.currentTimeMillis());
             //拿到bitmap（imageUtils）
-            Bitmap bitmap = ImageUtils.readDownsampledImage(uri.getPath(),1080,1920);
+            Bitmap bitmap = ImageUtils.readDownsampledImage(uri.getPath(), 1080, 1920);
             //保存到sd中
-            MyFileUtils.saveBitmap(bitmap,fileName);
+            MyFileUtils.saveBitmap(bitmap, fileName);
             //展示出来
             ImageItem photo = new ImageItem();
             photo.setImagePath(fileName + ".JPEG");
@@ -199,7 +199,7 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
         //CropHeler帮助我们做处理
-        CropHelper.handleResult(cropHandler,requestCode, resultCode, data);
+        CropHelper.handleResult(cropHandler, requestCode, resultCode, data);
     }
 
     //获取缓存文件夹中的文件
@@ -225,17 +225,21 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
         @Override
         public void onAddClicked() {
             //无图，点击，添加图片
-            if (picWindow != null && picWindow.isShowing()){
+            if (picWindow != null && picWindow.isShowing()) {
                 picWindow.dismiss();
-            }else if(picWindow != null){
+            } else if (picWindow != null) {
                 picWindow.show();
             }
         }
 
         @Override
         public void onPhotoClicked(ImageItem photo, ImageView imageView) {
-            // TODO: 2017/7/5 0005 跳转到图片展示页面
-            activityUtils.showToast("跳转到图片展示页面,待实现");
+            //跳转到图片展示页面
+            Intent intent = new Intent(GoodsUpLoadActivity.this, GoodsUpLoadImageShowActivity.class);
+            intent.putExtra("images", photo.getBitmap());
+            intent.putExtra("width", imageView.getWidth());
+            intent.putExtra("height", imageView.getHeight());
+            startActivity(intent);
         }
 
         @Override
@@ -273,11 +277,11 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
     //重写返回方法，实现点击返回改变模式
     @Override
     public void onBackPressed() {
-        if (title_mode == MODE_DONE){
+        if (title_mode == MODE_DONE) {
             //删除缓存
             deleteCache();
             finish();
-        }else if (title_mode == MODE_DELETE){
+        } else if (title_mode == MODE_DELETE) {
             //转变模式-- 改为普通模式
             changeModeActivity();
         }
@@ -286,7 +290,7 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
     //转变模式-- 改为普通模式
     private void changeModeActivity() {
         //判断，根据adapter判断当前模式是否是可删除模式
-        if (adapter.getMode() == GoodsUpLoadAdapter.MODE_MULTI_SELECT){
+        if (adapter.getMode() == GoodsUpLoadAdapter.MODE_MULTI_SELECT) {
             //删除tv不可见
             tv_goods_delete.setVisibility(View.GONE);
             //activity模式改变
@@ -307,16 +311,16 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
     }
 
     //商品类型，上传的点击事件
-    @OnClick({R.id.tv_goods_delete,R.id.btn_goods_type,R.id.btn_goods_load})
-    public void onClick(View view){
-        switch (view.getId()){
+    @OnClick({R.id.tv_goods_delete, R.id.btn_goods_type, R.id.btn_goods_load})
+    public void onClick(View view) {
+        switch (view.getId()) {
             //点击删除
             case R.id.tv_goods_delete:
                 ArrayList<ImageItem> del_list = adapter.getList();
                 int num = del_list.size();
-                for (int i = num - 1; i >= 0  ; i--) {
+                for (int i = num - 1; i >= 0; i--) {
                     //删除规则（checkbox被选中）
-                    if (del_list.get(i).isCheck()){
+                    if (del_list.get(i).isCheck()) {
                         //删除缓存文件夹中的文件
                         MyFileUtils.delFile(del_list.get(i).getImagePath());
                         del_list.remove(i);
@@ -343,17 +347,17 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
                 break;
             //点击上传按钮
             case R.id.btn_goods_load:
-                if (adapter.getSize() == 0){
+                if (adapter.getSize() == 0) {
                     activityUtils.showToast("最少有一张商品图片");
                     return;
                 }
-                presenter.upLoad(setGoodsInfo(),list);
+                presenter.upLoad(setGoodsInfo(), list);
                 break;
         }
     }
 
     //对商品信息做初始化
-    private GoodsUpLoad setGoodsInfo(){
+    private GoodsUpLoad setGoodsInfo() {
         GoodsUpLoad goodsLoad = new GoodsUpLoad();
         goodsLoad.setName(str_goods_name);
         goodsLoad.setPrice(str_goods_price);
@@ -364,13 +368,12 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
     }
 
 
-
     // ###################################  视图接口相关   #################
     @Override
     public void showPrb() {
-        if (dialogFragment == null)dialogFragment = new ProgressDialogFragment();
+        if (dialogFragment == null) dialogFragment = new ProgressDialogFragment();
         if (dialogFragment.isVisible()) return;
-        dialogFragment.show(getSupportFragmentManager(),"dialog");
+        dialogFragment.show(getSupportFragmentManager(), "dialog");
     }
 
     @Override
