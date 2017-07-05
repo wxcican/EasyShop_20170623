@@ -1,7 +1,10 @@
 package com.fuicuiedu.xc.easyshop_20170623.main.me.goodsupload;
 
+import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -13,6 +16,7 @@ import android.text.Editable;
 import android.text.TextUtils;
 import android.text.TextWatcher;
 import android.view.MenuItem;
+import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
@@ -20,11 +24,16 @@ import android.widget.TextView;
 
 import com.fuicuiedu.xc.easyshop_20170623.R;
 import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
+import com.fuicuiedu.xc.easyshop_20170623.commons.ImageUtils;
 import com.fuicuiedu.xc.easyshop_20170623.commons.MyFileUtils;
 import com.fuicuiedu.xc.easyshop_20170623.components.PicWindow;
 import com.fuicuiedu.xc.easyshop_20170623.components.ProgressDialogFragment;
 import com.fuicuiedu.xc.easyshop_20170623.model.ImageItem;
 import com.hannesdorfmann.mosby.mvp.MvpActivity;
+
+import org.hybridsquad.android.library.CropHandler;
+import org.hybridsquad.android.library.CropHelper;
+import org.hybridsquad.android.library.CropParams;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -56,6 +65,7 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
     private final String[] goods_type_num = {"household", "electron", "dress", "toy", "book", "gift", "other"};
 
     private ActivityUtils activityUtils;
+
     private String str_goods_name;//商品名
     private String str_goods_price;//商品价格
     private String str_goods_type = goods_type_num[0];//商品类型（默认家用）
@@ -123,14 +133,69 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
     private PicWindow.Listener listener = new PicWindow.Listener() {
         @Override
         public void toGallery() {
-            // TODO: 2017/7/5 0005 相册
+            //相册
+            CropHelper.clearCachedCropFile(cropHandler.getCropParams().uri);
+            Intent intent = CropHelper.buildCropFromGalleryIntent(cropHandler.getCropParams());
+            startActivityForResult(intent,CropHelper.REQUEST_CROP);
         }
 
         @Override
         public void toCamera() {
-            // TODO: 2017/7/5 0005 相机
+            //相机
+            CropHelper.clearCachedCropFile(cropHandler.getCropParams().uri);
+            Intent intent = CropHelper.buildCaptureIntent(cropHandler.getCropParams().uri);
+            startActivityForResult(intent,CropHelper.REQUEST_CAMERA);
         }
     };
+
+    //图片裁剪的handler
+    private CropHandler cropHandler = new CropHandler() {
+        @Override
+        public void onPhotoCropped(Uri uri) {
+            //需求：裁剪完成后，把图片保存为bitmap，并且保存到sd中，并且展示出来
+            //文件名：就是用系统当前时间，不重复
+            String fileName = String.valueOf(System.currentTimeMillis());
+            //拿到bitmap（imageUtils）
+            Bitmap bitmap = ImageUtils.readDownsampledImage(uri.getPath(),1080,1920);
+            //保存到sd中
+            MyFileUtils.saveBitmap(bitmap,fileName);
+            //展示出来
+            ImageItem photo = new ImageItem();
+            photo.setImagePath(fileName + ".JPEG");
+            photo.setBitmap(bitmap);
+            adapter.add(photo);
+            adapter.notifyData();
+        }
+
+        @Override
+        public void onCropCancel() {
+        }
+
+        @Override
+        public void onCropFailed(String message) {
+        }
+
+        @Override
+        public CropParams getCropParams() {
+            CropParams params = new CropParams();
+            params.aspectX = 400;
+            params.aspectY = 400;
+            return params;
+        }
+
+        @Override
+        public Activity getContext() {
+            return GoodsUpLoadActivity.this;
+        }
+    };
+
+    //当Activity拿到图片裁剪的返回时
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        //CropHeler帮助我们做处理
+        CropHelper.handleResult(cropHandler,requestCode, resultCode, data);
+    }
 
     //获取缓存文件夹中的文件
     public ArrayList<ImageItem> getFilePhoto() {
@@ -154,17 +219,27 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
     private GoodsUpLoadAdapter.OnItemClickedListener itemClickListener = new GoodsUpLoadAdapter.OnItemClickedListener() {
         @Override
         public void onAddClicked() {
-            // TODO: 2017/7/5 0005 相关实现，待完成
+            //无图，点击，添加图片
+            if (picWindow != null && picWindow.isShowing()){
+                picWindow.dismiss();
+            }else if(picWindow != null){
+                picWindow.show();
+            }
         }
 
         @Override
         public void onPhotoClicked(ImageItem photo, ImageView imageView) {
-
+            // TODO: 2017/7/5 0005 跳转到图片展示页面
+            activityUtils.showToast("跳转到图片展示页面,待实现");
         }
 
         @Override
         public void onLongClicked() {
-
+            //有图，长摁，执行删除相关
+            //模式改为可删除模式
+            title_mode = MODE_DELETE;
+            //删除的tv可见
+            tv_goods_delete.setVisibility(View.VISIBLE);
         }
     };
 
@@ -189,6 +264,46 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
             btn_goods_load.setEnabled(can_save);
         }
     };
+
+    //重写返回方法，实现点击返回改变模式
+    @Override
+    public void onBackPressed() {
+        if (title_mode == MODE_DONE){
+            //删除缓存
+            deleteCache();
+            finish();
+        }else if (title_mode == MODE_DELETE){
+            //转变模式-- 改为普通模式
+            changeModeActivity();
+        }
+    }
+
+    //转变模式-- 改为普通模式
+    private void changeModeActivity() {
+        //判断，根据adapter判断当前模式是否是可删除模式
+        if (adapter.getMode() == GoodsUpLoadAdapter.MODE_MULTI_SELECT){
+            //删除tv不可见
+            tv_goods_delete.setVisibility(View.GONE);
+            //activity模式改变
+            title_mode = MODE_DONE;
+            //adapter模式改变
+            adapter.changeMode(GoodsUpLoadAdapter.MODE_NORMAL);
+            for (int i = 0; i < adapter.getList().size(); i++) {
+                adapter.getList().get(i).setCheck(false);
+            }
+        }
+    }
+
+    //删除缓存
+    private void deleteCache() {
+        for (int i = 0; i < adapter.getList().size(); i++) {
+            MyFileUtils.delFile(adapter.getList().get(i).getImagePath());
+        }
+    }
+
+    // TODO: 2017/7/5 0005 删除，商品类型，上传的点击事件等
+
+
 
     // ###################################  视图接口相关   #################
     @Override
