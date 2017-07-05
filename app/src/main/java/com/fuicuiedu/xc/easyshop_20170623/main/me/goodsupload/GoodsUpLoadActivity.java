@@ -1,11 +1,13 @@
 package com.fuicuiedu.xc.easyshop_20170623.main.me.goodsupload;
 
 import android.app.Activity;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
@@ -28,6 +30,8 @@ import com.fuicuiedu.xc.easyshop_20170623.commons.ImageUtils;
 import com.fuicuiedu.xc.easyshop_20170623.commons.MyFileUtils;
 import com.fuicuiedu.xc.easyshop_20170623.components.PicWindow;
 import com.fuicuiedu.xc.easyshop_20170623.components.ProgressDialogFragment;
+import com.fuicuiedu.xc.easyshop_20170623.model.CachePreferences;
+import com.fuicuiedu.xc.easyshop_20170623.model.GoodsUpLoad;
 import com.fuicuiedu.xc.easyshop_20170623.model.ImageItem;
 import com.hannesdorfmann.mosby.mvp.MvpActivity;
 
@@ -40,6 +44,7 @@ import java.util.ArrayList;
 
 import butterknife.BindView;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
 public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoadPresenter> implements GoodsUpLoadView {
 
@@ -301,28 +306,85 @@ public class GoodsUpLoadActivity extends MvpActivity<GoodsUpLoadView, GoodsUpLoa
         }
     }
 
-    // TODO: 2017/7/5 0005 删除，商品类型，上传的点击事件等
+    //商品类型，上传的点击事件
+    @OnClick({R.id.tv_goods_delete,R.id.btn_goods_type,R.id.btn_goods_load})
+    public void onClick(View view){
+        switch (view.getId()){
+            //点击删除
+            case R.id.tv_goods_delete:
+                ArrayList<ImageItem> del_list = adapter.getList();
+                int num = del_list.size();
+                for (int i = num - 1; i >= 0  ; i--) {
+                    //删除规则（checkbox被选中）
+                    if (del_list.get(i).isCheck()){
+                        //删除缓存文件夹中的文件
+                        MyFileUtils.delFile(del_list.get(i).getImagePath());
+                        del_list.remove(i);
+                    }
+                }
+                this.list = del_list;
+                adapter.notifyData();
+                changeModeActivity();
+                break;
+            //点击商品类型
+            case R.id.btn_goods_type:
+                AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                builder.setTitle("商品类型");
+                builder.setItems(goods_type, new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        //显示商品类型
+                        tv_goods_type.setText(goods_type[which]);
+                        //拿到商品类型的英文描述（用于上传）
+                        str_goods_type = goods_type_num[which];
+                    }
+                });
+                builder.create().show();
+                break;
+            //点击上传按钮
+            case R.id.btn_goods_load:
+                if (adapter.getSize() == 0){
+                    activityUtils.showToast("最少有一张商品图片");
+                    return;
+                }
+                presenter.upLoad(setGoodsInfo(),list);
+                break;
+        }
+    }
+
+    //对商品信息做初始化
+    private GoodsUpLoad setGoodsInfo(){
+        GoodsUpLoad goodsLoad = new GoodsUpLoad();
+        goodsLoad.setName(str_goods_name);
+        goodsLoad.setPrice(str_goods_price);
+        goodsLoad.setDescription(str_goods_describe);
+        goodsLoad.setType(str_goods_type);
+        goodsLoad.setMaster(CachePreferences.getUser().getName());
+        return goodsLoad;
+    }
 
 
 
     // ###################################  视图接口相关   #################
     @Override
     public void showPrb() {
-
+        if (dialogFragment == null)dialogFragment = new ProgressDialogFragment();
+        if (dialogFragment.isVisible()) return;
+        dialogFragment.show(getSupportFragmentManager(),"dialog");
     }
 
     @Override
     public void hidePrb() {
-
+        dialogFragment.dismiss();
     }
 
     @Override
     public void upLoadSuccess() {
-
+        finish();
     }
 
     @Override
     public void showMsg(String msg) {
-
+        activityUtils.showToast(msg);
     }
 }
