@@ -6,6 +6,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 
@@ -104,8 +105,80 @@ public class GoodsUpLoadAdapter extends RecyclerView.Adapter {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
+    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+        //判断当前的vh是不是ItemSelectViewHolder的实例
+        if (holder instanceof ItemSelectViewHolder){
+            //当前数据
+            ImageItem imageItem = list.get(position);
+            //拿到当前的vh（已经判断vh的实例，所以强转）
+            final ItemSelectViewHolder item_select = (ItemSelectViewHolder) holder;
+            item_select.photo = imageItem;
+            //判断模式（正常，或，可删除）
+            if (mode == MODE_MULTI_SELECT){
+                //可选框可见
+                item_select.checkBox.setVisibility(View.VISIBLE);
+                //可选框的选择监听
+                item_select.checkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                    @Override
+                    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                        //imageItem中选择状态改变
+                        list.get(position).setCheck(isChecked);
+                    }
+                });
+                //可选框的改变（根据imageitem的选择状态）
+                item_select.checkBox.setChecked(imageItem.isCheck());
+            }else if(mode == MODE_NORMAL){
+                //可选框隐藏
+                item_select.checkBox.setVisibility(View.GONE);
+            }
+            //图片设置
+            item_select.ivPhoto.setImageBitmap(imageItem.getBitmap());
+            //单击图片跳转到图片展示页
+            item_select.ivPhoto.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    //跳转到图片详情页
+                    if (listener != null){
+                        listener.onPhotoClicked(item_select.photo,item_select.ivPhoto);
+                    }
+                }
+            });
+            //长按图片改为可删除模式
+            item_select.ivPhoto.setOnLongClickListener(new View.OnLongClickListener() {
+                @Override
+                public boolean onLongClick(View v) {
+                    //模式改为可删除模式
+                    mode = MODE_MULTI_SELECT;
+                    //更新
+                    notifyDataSetChanged();
+                    //执行长按的监听时间
+                    if (listener != null){
+                        listener.onLongClicked();
+                    }
+                    return false;
+                }
+            });
+        }
 
+        //判断当前vh是不是ItemAddViewHolder的实例
+        else if (holder instanceof ItemAddViewHolder){
+            ItemAddViewHolder item_add = (ItemAddViewHolder) holder;
+            //最多八张图
+            if (position == 8){
+                item_add.ib_add.setVisibility(View.GONE);
+            }else{
+                item_add.ib_add.setVisibility(View.VISIBLE);
+            }
+            //点击添加图片
+            item_add.ib_add.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (listener != null){
+                        listener.onAddClicked();
+                    }
+                }
+            });
+        }
     }
 
     @Override
