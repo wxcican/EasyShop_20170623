@@ -8,10 +8,13 @@ import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
 import android.widget.TextView;
 
+import com.feicuiedu.apphx.presentation.contact.list.HxContactListFragment;
+import com.feicuiedu.apphx.presentation.conversation.HxConversationListFragment;
 import com.fuicuiedu.xc.easyshop_20170623.R;
 import com.fuicuiedu.xc.easyshop_20170623.commons.ActivityUtils;
 import com.fuicuiedu.xc.easyshop_20170623.main.me.MeFragment;
 import com.fuicuiedu.xc.easyshop_20170623.main.shop.ShopFragment;
+import com.fuicuiedu.xc.easyshop_20170623.model.CachePreferences;
 
 import butterknife.BindView;
 import butterknife.BindViews;
@@ -46,8 +49,14 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void init() {
-        //设置适配器
-        viewPager.setAdapter(unLoginAdapter);
+        //判断用户是否登录，从而选择不用的适配器
+        if (CachePreferences.getUser().getName() == null){
+            viewPager.setAdapter(unLoginAdapter);
+            viewPager.setCurrentItem(0);
+        }else{
+            viewPager.setAdapter(loginAdapter);
+            viewPager.setCurrentItem(0);
+        }
 
         //刚进来默认选择市场页面
         textViews[0].setSelected(true);
@@ -61,7 +70,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onPageSelected(int position) {
                 //textView全部未选择
-                for (TextView textView : textViews){
+                for (TextView textView : textViews) {
                     textView.setSelected(false);
                 }
 
@@ -76,7 +85,34 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    //todo 用户已经登录时的适配器
+    //用户已经登录时的适配器
+    private FragmentStatePagerAdapter loginAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
+        @Override
+        public Fragment getItem(int position) {
+            switch (position) {
+                //市场
+                case 0:
+                    return new ShopFragment();
+                //消息
+                case 1:
+                    return new HxConversationListFragment();
+                //通讯录
+                case 2:
+                    return new HxContactListFragment();
+                //我的
+                case 3:
+                    return new MeFragment();
+            }
+            return null;
+        }
+
+        @Override
+        public int getCount() {
+            //确定4个页面，写死为4
+            return 4;
+        }
+    };
+
 
     //用户未登录时的适配器(ctrl + p 查看所需参数)
     private FragmentStatePagerAdapter unLoginAdapter = new FragmentStatePagerAdapter(getSupportFragmentManager()) {
@@ -86,13 +122,13 @@ public class MainActivity extends AppCompatActivity {
                 //市场
                 case 0:
                     return new ShopFragment();
-                    //消息
+                //消息
                 case 1:
                     return new UnLoginFragment();
-                    //通讯录
+                //通讯录
                 case 2:
                     return new UnLoginFragment();
-                    //我的
+                //我的
                 case 3:
                     return new MeFragment();
             }
@@ -109,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
 
     //textView点击事件
     @OnClick({R.id.tv_shop, R.id.tv_message, R.id.tv_mail_list, R.id.tv_me})
-    public void onClick(TextView textView){
+    public void onClick(TextView textView) {
         for (int i = 0; i < textViews.length; i++) {
             textViews[i].setSelected(false);
             textViews[i].setTag(i);
@@ -118,8 +154,8 @@ public class MainActivity extends AppCompatActivity {
         //设置选择效果
         textView.setSelected(true);
         //不要平滑效果，第二个参数设置为false
-        viewPager.setCurrentItem((int)textView.getTag(),false);
-        tv_title.setText(textViews[(int)textView.getTag()].getText());
+        viewPager.setCurrentItem((int) textView.getTag(), false);
+        tv_title.setText(textViews[(int) textView.getTag()].getText());
     }
 
     //如何知道用户点击了返回按钮？返回按钮点击监听
